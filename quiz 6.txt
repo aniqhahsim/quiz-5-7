@@ -1,0 +1,97 @@
+#include<p18F4550.inc>
+
+		org 0x00
+		goto start
+		org 0x08
+		retfie
+		org 0x18
+		retfie
+
+loop_cnt1	set	0x00
+loop_cnt2	set	0x01
+			
+dup_nop	macro aniq
+		variable	i
+i = 0
+			while	i < aniq
+			nop
+i+= 1
+			endw
+			endm
+			
+;to clear portd
+offLED		CLRF PORTD,A
+			RETURN
+			
+;the 0.5 sec delay
+delay		MOVLW D'250'
+			MOVWF loop_cnt2,A
+AGAIN1		MOVLW D'146'
+			MOVWF loop_cnt1,A 
+delay1 		dup_nop 	D'7'
+			DECFSZ loop_cnt1,F,A
+			BRA delay1
+			DECFSZ loop_cnt2,F,A
+			BRA AGAIN1
+			NOP
+			RETURN
+			
+			
+;DISPLAY NUMBER 9
+NO9			SETF PORTD,A
+			BCF	 PORTD,4,A
+			RETURN
+;DISPLAY NUMBER 6
+NO6			SETF PORTD,A
+			BCF  PORTD,1,A
+			RETURN
+;DISPLAY NUMBER 5
+NO5			SETF PORTD,A
+			BCF  PORTD,1,A
+			BCF  PORTD,4,A
+			RETURN
+;DISPLAY NUMBER 7
+NO7			SETF PORTD,A
+			BCF  PORTD,4,A
+			BCF  PORTD,5,A
+			BCF  PORTD,6,A
+			BCF  PORTD,7,A
+			BCF  PORTD,3,A
+			RETURN
+;DISPLAY NUMBER 3
+NO3			SETF PORTD,A
+			BCF  PORTD,4,A
+			BCF  PORTD,5,A
+			RETURN
+			
+			
+;DISPLAY D
+THE_D		SETF  PORTD,A
+			BCF   PORTD,0,A
+			BCF   PORTD,5,A
+			RETURN
+;DISPLAY E
+THE_E		SETF  PORTD,A
+			BCF   PORTD,1,A
+			BCF   PORTD,2,A
+			RETURN
+;THE PROGRAM DE96573
+
+start		CLRF	TRISD,A
+			CALL	offLED
+			CALL	THE_D
+			CALL	delay
+			CALL	THE_E
+			CALL	delay
+			CALL	NO9
+			CALL	delay
+			CALL	NO6
+			CALL	delay
+			CALL	NO5
+			CALL	delay
+			CALL	NO7
+			CALL	delay
+			CALL	NO3
+			CALL	delay
+			BRA		start
+			end

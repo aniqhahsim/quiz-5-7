@@ -1,0 +1,124 @@
+#include<p18F4550.inc>
+
+loop_cnt1	    set	0x00
+loop_cnt2	    set	0x01
+		
+		    org	0x00
+		    goto	Start
+			org 0x08
+			retfie
+			org 0x18
+			retfie
+
+dup_nop		macro	aniq
+			variable	i
+i=0
+			while i	<	aniq
+			nop
+i+=1
+			endw
+			endm
+
+
+;****************************************************************
+;For 7 Segment Display DE96573
+;****************************************************************
+Start		CLRF		TRISD, A
+			SETF		TRISB, A
+			CLRF		PORTD, A
+CHECK	 	BTFSS		PORTB, 0 , A
+			BRA			ONZ
+			CLRF		PORTD , A
+			BTFSS		PORTB, A
+			BRA			LAZE
+			BRA			CHECK
+
+ONZ			CALL		SHOWD
+			CALL		DELAY
+			CALL		SHOWE
+			CALL		DELAY
+			CALL		SHOW9
+			CALL 		DELAY
+			CALL		SHOW6
+			CALL		DELAY
+			CALL		SHOW5
+			CALL		DELAY
+			CALL		SHOW7
+			CALL		DELAY				
+			CALL 		SHOW3
+			BRA			CHECK
+
+LAZE		CALL		SHOW3
+			CALL		DELAY
+			CALL		SHOW7
+			CALL		DELAY
+			CALL		SHOW5
+			CALL		DELAY
+			CALL		SHOW6
+			CALL 		DELAY
+			CALL		SHOW9
+			CALL		DELAY
+			CALL		SHOWE
+			CALL		DELAY
+			CALL		SHOWD
+			CALL		DELAY
+			CALL		CLEARled
+			CALL		DELAY
+			BRA			CHECK
+
+SHOWD		SETF		PORTD,A
+			BCF			PORTD,0,A
+			BCF			PORTD,5,A
+			RETURN
+
+SHOWE		SETF		PORTD,A
+			BCF			PORTD,1,A
+			BCF			PORTD,2,A
+			RETURN
+
+SHOW9		SETF 		PORTD,A
+			BCF	 		PORTD,4,A
+			RETURN			
+
+SHOW6		SETF 		PORTD,A
+			BCF  		PORTD,1,A
+			RETURN
+
+SHOW5		SETF 		PORTD,A
+			BCF  		PORTD,1,A
+			BCF  		PORTD,4,A
+			RETURN
+
+
+SHOW7		SETF 		PORTD,A
+			BCF  		PORTD,4,A
+			BCF  		PORTD,5,A
+			BCF  		PORTD,6,A
+			BCF  		PORTD,7,A
+			BCF  		PORTD,3,A
+			RETURN
+
+SHOW3		SETF 		PORTD,A
+			BCF  		PORTD,4,A
+			BCF  		PORTD,5,A
+			RETURN
+
+CLEARled	CLRF		PORTD,A
+			RETURN
+
+;****************************************************************
+;Subroutine 1 sec between the display digit
+;****************************************************************
+
+DELAY		MOVLW	D'80'			;1sec delay subroutine for external loop
+			MOVWF	loop_cnt2,A
+AGAIN1		MOVLW	D'250'		;internal loop
+			MOVWF	loop_cnt1,A
+AGAIN2		dup_nop	D'247'
+			DECFSZ	loop_cnt1,F,A
+			BRA		AGAIN2
+			DECFSZ  loop_cnt2,F,A
+			BRA		AGAIN1
+			RETURN
+
+			END
